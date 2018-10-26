@@ -9,12 +9,11 @@ var path = require("path"),
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.set('view engine', 'ejs');
+
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-app.use(express.static(__dirname + "/public"));
-app.set("/view", path.join(__dirname, "/public/view"));
 app.use("/node", express.static(__dirname + "/node_modules"));
 
 app.use(
@@ -25,11 +24,14 @@ app.use(
     })
 );
 
-var linkedin = require("./api/api");
-app.use("/api", linkedin);
+var linkedin = require("./api/api")
+var api = linkedin.router;
+app.use("/api", api);
 
 app.use("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/index.html"));
+    res.render("index.ejs", {
+        message: linkedin.oauthUrl
+    });
 });
 
 app.listen(port, function(err) {
